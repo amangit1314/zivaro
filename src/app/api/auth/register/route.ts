@@ -19,9 +19,7 @@ const isPasswordValid = (password: string) => {
 
 export const POST = async (req: NextRequest) => {
     const reqBody = await req.json();
-    const { email, password } = reqBody;
-
-    console.log('Registeration request body: ', reqBody);
+    const { email, password, name, role } = reqBody;
 
     try {
         if (!email || !password) {
@@ -53,18 +51,22 @@ export const POST = async (req: NextRequest) => {
         });
 
         if (isUserAlreadyRegistered) {
-            console.log('Registeration ERROR: Authentication failed. There is already a user with these credentials 🔐👮‍♂️ ...');
             return NextResponse.json({
                 status: false,
-                message: "Authentication failed. There is already a user with these credentials 🔐👮‍♂️ ...",
+                message: "An account with this email already exists",
             }, { status: 403 });
         }
+
+        const referralCode = `ZIV${uuid4.slice(0, 8).toUpperCase()}`;
 
         const createdUser = await db.user.create({
             data: {
                 id: uuid4,
                 email,
                 password: hashedPassword,
+                name: name || null,
+                role: role === "SELLER" ? "SELLER" : "BUYER",
+                referralCode,
             },
         });
 

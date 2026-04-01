@@ -145,8 +145,7 @@ export const useProductStore = create<ProductState & ProductActions>()(
       },
     }),
     {
-      name: "ecommerce-task-product-store",
-      getStorage: () => localStorage,
+      name: "zivaro-product-store",
     }
   )
 );

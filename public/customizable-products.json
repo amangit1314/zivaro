@@ -1,0 +1,90 @@
+[
+  {
+    "id": "custom_1",
+    "name": "Custom T-Shirt",
+    "description": "Premium cotton t-shirt with your custom design. Upload your image or add custom text to make it uniquely yours.",
+    "basePrice": 24.99,
+    "customizationFee": 5,
+    "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80",
+    "category": "clothing",
+    "colors": ["White", "Black", "Navy", "Red", "Gray"],
+    "sizes": ["XS", "S", "M", "L", "XL", "XXL"]
+  },
+  {
+    "id": "custom_2",
+    "name": "Custom Coffee Mug",
+    "description": "Ceramic 11oz mug with your personalized design. Perfect for gifts or daily use.",
+    "basePrice": 14.99,
+    "customizationFee": 5,
+    "image": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=500&q=80",
+    "category": "drinkware",
+    "colors": ["White", "Black"],
+    "sizes": ["11oz", "15oz"]
+  },
+  {
+    "id": "custom_3",
+    "name": "Custom Phone Case",
+    "description": "Durable snap-on phone case with your design. Available for popular phone models.",
+    "basePrice": 19.99,
+    "customizationFee": 5,
+    "image": "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=500&q=80",
+    "category": "accessories",
+    "colors": ["Clear", "Black", "White"],
+    "sizes": ["iPhone 14", "iPhone 15", "iPhone 15 Pro", "Samsung S24", "Samsung S24 Ultra"]
+  },
+  {
+    "id": "custom_4",
+    "name": "Custom Laptop Sleeve",
+    "description": "Neoprene laptop sleeve with your custom artwork. Protects and personalizes your device.",
+    "basePrice": 29.99,
+    "customizationFee": 5,
+    "image": "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=500&q=80",
+    "category": "accessories",
+    "colors": ["Black", "Gray", "Navy"],
+    "sizes": ["13 inch", "14 inch", "15 inch", "16 inch"]
+  },
+  {
+    "id": "custom_5",
+    "name": "Custom Tote Bag",
+    "description": "Eco-friendly canvas tote bag with your personalized design. Great for everyday carry.",
+    "basePrice": 18.99,
+    "customizationFee": 5,
+    "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&q=80",
+    "category": "bags",
+    "colors": ["Natural", "Black", "Navy"],
+    "sizes": ["Standard"]
+  },
+  {
+    "id": "custom_6",
+    "name": "Custom Hoodie",
+    "description": "Cozy pullover hoodie with your custom print. Soft fleece lining for maximum comfort.",
+    "basePrice": 44.99,
+    "customizationFee": 5,
+    "image": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80",
+    "category": "clothing",
+    "colors": ["Black", "Gray", "White", "Navy", "Burgundy"],
+    "sizes": ["S", "M", "L", "XL", "XXL"]
+  },
+  {
+    "id": "custom_7",
+    "name": "Custom Water Bottle",
+    "description": "Stainless steel insulated water bottle with your design. Keeps drinks cold 24hrs or hot 12hrs.",
+    "basePrice": 22.99,
+    "customizationFee": 5,
+    "image": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=500&q=80",
+    "category": "drinkware",
+    "colors": ["White", "Black", "Silver", "Rose Gold"],
+    "sizes": ["500ml", "750ml"]
+  },
+  {
+    "id": "custom_8",
+    "name": "Custom Cap",
+    "description": "Adjustable snapback cap with embroidered or printed custom design.",
+    "basePrice": 19.99,
+    "customizationFee": 5,
+    "image": "https://images.unsplash.com/photo-1588850561407-ed78c334e67a?w=500&q=80",
+    "category": "accessories",
+    "colors": ["Black", "White", "Navy", "Red", "Khaki"],
+    "sizes": ["One Size"]
+  }
+]

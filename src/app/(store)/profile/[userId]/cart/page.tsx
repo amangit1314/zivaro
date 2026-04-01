@@ -1,58 +1,79 @@
 "use client";
 
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 import { CartItem } from "@/types/cart-item";
 import { useCartStore } from "@/zustand/cart-store";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { CartItemCard } from "./components/cart-item-card";
 import PeopleAlsoBought from "./components/people-also-bought";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { useUserStore } from "@/zustand/user-store";
+import { Ticket, ShoppingBag, Check } from "lucide-react";
+
+const VALID_COUPONS: Record<
+  string,
+  { discountPercent: number; minOrderAmount: number; maxDiscount: number }
+> = {
+  WELCOME10: { discountPercent: 10, minOrderAmount: 50, maxDiscount: 25 },
+  SAVE20: { discountPercent: 20, minOrderAmount: 100, maxDiscount: 50 },
+  FLASH15: { discountPercent: 15, minOrderAmount: 75, maxDiscount: 30 },
+  SUMMER25: { discountPercent: 25, minOrderAmount: 150, maxDiscount: 75 },
+};
 
 const CartPage = ({ params }: { params: { userId: string } }) => {
   const userId = params?.userId!;
-  const { loading, cartItems } = useCartStore();
-
-  if (loading) {
-    toast.loading("Loading cartitems ⏳ ...");
-  }
+  const { cartItems } = useCartStore();
 
   return (
-    <div>
-      <div className="px-12">
-        <Header />
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
 
-      <Toaster />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-8">
+          Shopping Cart
+          {cartItems.length > 0 && (
+            <span className="text-sm font-normal text-gray-500 ml-2">
+              ({cartItems.length} item{cartItems.length !== 1 ? "s" : ""})
+            </span>
+          )}
+        </h1>
 
-      <section className="bg-white py-8 antialiased dark:bg-gray-900 md:py-16 px-8">
-        <div className="mx-auto max-w-screen px-4 2xl:px-0">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white md:text-2xl tracking-tight">
-            Shopping Cart
-          </h2>
-
-          {/* cart items, people also bought and order summary */}
-          <div className="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
-            {/* cart items and people also bought */}
-            <div className="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">
-              <div className="space-y-6">
-                {cartItems.map((cartItem: CartItem) => (
-                  <div key={cartItem.cartItemId}>
-                    <CartItemCard cartItem={cartItem} />
-                  </div>
-                ))}
-              </div>
+        {cartItems.length === 0 ? (
+          <div className="text-center py-20 space-y-4">
+            <ShoppingBag className="w-16 h-16 text-gray-200 mx-auto" />
+            <p className="text-lg font-semibold text-gray-900">
+              Your cart is empty
+            </p>
+            <p className="text-sm text-gray-500">
+              Looks like you haven&apos;t added anything yet
+            </p>
+            <Link
+              href="/"
+              className="inline-block mt-4 px-8 py-3 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors"
+            >
+              Start Shopping
+            </Link>
+          </div>
+        ) : (
+          <div className="lg:flex lg:items-start lg:gap-8">
+            {/* Cart items */}
+            <div className="flex-1 space-y-4">
+              {cartItems.map((cartItem: CartItem) => (
+                <CartItemCard key={cartItem.cartItemId} cartItem={cartItem} />
+              ))}
 
               <PeopleAlsoBought />
             </div>
 
-            {/* order summary */}
+            {/* Order summary */}
             <OrderSummary userId={userId} />
           </div>
-        </div>
-      </section>
+        )}
+      </main>
+
+      <Footer />
     </div>
   );
 };
@@ -61,119 +82,161 @@ export default CartPage;
 
 const OrderSummary = ({ userId }: { userId: string }) => {
   const { totalItems, totalPrice } = useCartStore();
-  const savings = 0;
-  const storePickup = totalItems >= 1 ? (totalPrice > 25 ? 0 : 5) : 0;
-  const tax = Math.ceil(totalItems >= 1 ? totalPrice * 0.05 : 0); // 5% tax
-
-  const sumTotal = totalPrice + tax + storePickup - savings;
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
   const router = useRouter();
 
+  const storePickup = totalItems >= 1 ? (totalPrice > 25 ? 0 : 5) : 0;
+  const tax = Math.ceil(totalItems >= 1 ? totalPrice * 0.05 : 0);
+  const sumTotal = totalPrice + tax + storePickup - couponDiscount;
+
+  const applyCoupon = () => {
+    const code = couponCode.toUpperCase().trim();
+    const coupon = VALID_COUPONS[code];
+
+    if (!coupon) {
+      toast.error("Invalid coupon code");
+      return;
+    }
+
+    if (totalPrice < coupon.minOrderAmount) {
+      toast.error(
+        `Minimum order amount is $${coupon.minOrderAmount} for this coupon`
+      );
+      return;
+    }
+
+    const discount = Math.min(
+      (totalPrice * coupon.discountPercent) / 100,
+      coupon.maxDiscount
+    );
+
+    setCouponDiscount(Math.round(discount * 100) / 100);
+    setAppliedCoupon(code);
+    toast.success(`Coupon ${code} applied! You save $${discount.toFixed(2)}`);
+  };
+
+  const removeCoupon = () => {
+    setCouponDiscount(0);
+    setAppliedCoupon(null);
+    setCouponCode("");
+    toast.success("Coupon removed");
+  };
+
   return (
-    <div className="mx-auto max-w-4xl flex-1 space-y-6 lg:mt-0 lg:w-full">
-      <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6">
-        {/* order summary text */}
-        <p className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">
-          Order summary
-        </p>
+    <div className="lg:w-96 mt-8 lg:mt-0">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5 sticky top-24">
+        <h2 className="text-lg font-bold text-gray-900">Order Summary</h2>
 
-        {/* summary items */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-500 dark:text-gray-400">
-                Original price
-              </dt>
-              <dd className="text-base font-medium text-gray-900 dark:text-white">
-                ${totalPrice || 0}
-              </dd>
-            </dl>
-
-            <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-500 dark:text-gray-400">
-                Store Pickup
-              </dt>
-              <dd className="text-base font-medium text-gray-900 dark:text-white">
-                ${storePickup}
-              </dd>
-            </dl>
-
-            {/* <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-500 dark:text-gray-400">
-                Total Items
-              </dt>
-              <dd className="text-base font-medium text-gray-900 dark:text-white">
-                {totalItems}
-              </dd>
-            </dl> */}
-
-            <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-500 dark:text-gray-400">
-                Savings
-              </dt>
-              <dd className="text-base font-medium text-green-600">
-                -${savings}
-              </dd>
-            </dl>
-
-            <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-500 dark:text-gray-400">
-                Tax
-              </dt>
-              <dd className="text-base font-medium text-gray-900 dark:text-white">
-                ${tax}
-              </dd>
-            </dl>
+        {/* Summary items */}
+        <div className="space-y-3 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-500">
+              Subtotal ({totalItems} items)
+            </span>
+            <span className="font-medium text-gray-900">
+              ${totalPrice.toFixed(2)}
+            </span>
           </div>
 
-          <dl className="flex items-center justify-between gap-4 border-t border-gray-200 pt-2 dark:border-gray-700">
-            <dt className="text-base font-bold text-gray-900 dark:text-white">
-              Total
-            </dt>
-            <dd className="text-base font-bold text-gray-900 dark:text-white">
+          <div className="flex justify-between">
+            <span className="text-gray-500">Shipping</span>
+            <span className="font-medium text-gray-900">
+              {storePickup === 0 ? (
+                <span className="text-emerald-600">Free</span>
+              ) : (
+                `$${storePickup}`
+              )}
+            </span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="text-gray-500">Tax (5%)</span>
+            <span className="font-medium text-gray-900">
+              ${tax.toFixed(2)}
+            </span>
+          </div>
+
+          {couponDiscount > 0 && (
+            <div className="flex justify-between">
+              <span className="text-emerald-600 font-medium">
+                Coupon ({appliedCoupon})
+              </span>
+              <span className="font-medium text-emerald-600">
+                -${couponDiscount.toFixed(2)}
+              </span>
+            </div>
+          )}
+
+          <div className="border-t border-gray-100 pt-3 flex justify-between">
+            <span className="text-base font-bold text-gray-900">Total</span>
+            <span className="text-base font-bold text-gray-900">
               ${sumTotal.toFixed(2)}
-            </dd>
-          </dl>
+            </span>
+          </div>
         </div>
 
-        {/* checkout button */}
+        {/* Coupon code input */}
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <Ticket className="w-4 h-4" />
+            <span>Have a coupon?</span>
+          </div>
+
+          {appliedCoupon ? (
+            <div className="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+              <div className="flex items-center space-x-2">
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span className="text-sm font-bold text-emerald-700">
+                  {appliedCoupon}
+                </span>
+                <span className="text-xs text-emerald-600">
+                  (-${couponDiscount.toFixed(2)})
+                </span>
+              </div>
+              <button
+                onClick={removeCoupon}
+                className="text-xs text-red-500 hover:text-red-700 font-medium"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                placeholder="Enter code"
+                className="flex-1 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+              />
+              <button
+                onClick={applyCoupon}
+                disabled={!couponCode.trim()}
+                className="px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Apply
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Checkout button */}
         <button
-          onClick={() => {
-            router.push(`/profile/${userId}/cart/checkout`);
-          }}
+          onClick={() => router.push(`/profile/${userId}/cart/checkout`)}
           disabled={totalPrice === 0}
-          className="flex w-full items-center justify-center disabled:cursor-not-allowed disabled:opacity-40 rounded-lg bg-red-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+          className="w-full py-3.5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg shadow-red-600/25"
         >
           Proceed to Checkout
         </button>
 
-        {/* or continue shopping */}
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-            or
-          </span>
-          <Link
-            href="/"
-            title=""
-            className="inline-flex items-center gap-2 text-sm font-medium text-red-700 underline hover:no-underline dark:text-red-500"
-          >
-            Continue Shopping
-            <svg
-              className="h-5 w-5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 12H5m14 0-4 4m4-4-4-4"
-              />
-            </svg>
-          </Link>
-        </div>
+        <Link
+          href="/"
+          className="block text-center text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+        >
+          Continue Shopping
+        </Link>
       </div>
     </div>
   );

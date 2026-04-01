@@ -196,8 +196,7 @@ export const useUserStore = create<UserState & UserActions>()(
       // },
     }),
     {
-      name: "ecommerce-task-user-store",
-      getStorage: () => localStorage,
+      name: "zivaro-user-store",
     }
   )
 );

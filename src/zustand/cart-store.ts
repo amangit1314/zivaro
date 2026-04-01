@@ -195,8 +195,7 @@ export const useCartStore = create<CartState & CartActions>()(
       },
     }),
     {
-      name: "ecommerce-task-cart-store",
-      getStorage: () => localStorage,
+      name: "zivaro-cart-store",
     }
   )
 );

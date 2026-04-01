@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, Montserrat, Poppins } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
-const inter = Poppins({
+const poppins = Poppins({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Ecommerce",
-  description: "A interview process test",
+  title: "Zivaro - Your Smart Shopping Destination",
+  description: "Discover amazing deals, earn rewards, and shop smarter with Zivaro",
 };
 
 export default function RootLayout({
@@ -19,7 +20,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={poppins.className}>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              borderRadius: "12px",
+              padding: "12px 16px",
+              fontSize: "14px",
+            },
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

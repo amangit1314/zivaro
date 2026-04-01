@@ -61,8 +61,7 @@ export const useProductsStore = create<ProductsState & ProductsActions>()(
       // filterProducts: async (queries: string[]) => {},
     }),
     {
-      name: "ecommerce-products-store",
-      getStorage: () => localStorage,
+      name: "zivaro-products-store",
     }
   )
 );
